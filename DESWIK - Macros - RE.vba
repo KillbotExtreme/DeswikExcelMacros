@@ -649,7 +649,54 @@ End Sub
 
 
 
+'Uses the polyline that was just digitised.
+'Gets the area and height attributes and multiplies them to get a volume
+'Shows the result in the Output window
 
+'Created by Russell Easton 240401
+
+'#Language "WWB.NET"
+
+Imports Deswik.Graphics
+Imports System.Collections.Generic
+Imports Deswik.Graphics.DataDrivers
+Imports System.Collections
+
+Sub Main
+    
+    'Set up Variables
+    Dim area As Double
+    Dim height As Double
+    Dim volume As Double
+
+    'Gets the selected polyline
+    Dim sel As Collections.Selection = CurrentDoc.UserCommands.SelectionInteractiveGet("Select Polyline", "polyline")
+    If sel.Count = 0 Then
+        Exit Sub
+    End If
+
+    For Each strip As Primaries.Figure In sel
+        
+        'sets the variables
+        On Error GoTo ErrorHandler
+            area = strip.EntityPropertyValueGet("Area")
+            height = sel.EntitiesAttributesValuesGet("Strip Height").Item(0)
+            volume = Round(area * height, 3)
+
+            'Write a message In the Output window showing volume
+            CurrentDoc.OnMessageOutput("Strip Volume: "+(volume).ToString+"m³", False, False, System.Drawing.Color.Green, True, False)
+
+            'Move to Stripping Layer
+            CurrentDoc.UserCommands.EntitiesCopyMoveToLayer(False, sel, {"ASBUILT\EOM\STRIPPING"}, True, False, False)
+
+        Exit Sub
+        ErrorHandler:
+            CurrentDoc.OnMessageOutput("Error: Check height is entered", False, False, System.Drawing.Color.Red, True, False)
+
+    Next
+
+
+End Sub
 
 
 
